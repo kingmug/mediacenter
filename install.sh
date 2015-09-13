@@ -18,6 +18,9 @@ if [ -z "${variables['TARGET_DIR']}" ]; then
     exit
 fi
 
+sudo rm -rf $TARGET_DIR/couchpotato
+sudo rm -rf $TARGET_DIR/sickrage/
+sudo rm -rf $TARGET_DIR/transmission
 
 rm -rf config/generated
 mkdir config/generated

@@ -1,3 +1,6 @@
+REPO_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+source $REPO_DIR/config/globals.conf
+
 
 docker run -d \
  --name cron \
@@ -20,7 +23,7 @@ docker run -d \
  busybox
 
 docker run -d \
- --name="sickrage" \
+ --name sickrage \
  -h localhost \
  -v $TARGET_DIR/sickrage/config:/config \
  -v $TARGET_DIR/data/downloads/series:/data \
