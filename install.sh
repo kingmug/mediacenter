@@ -77,7 +77,7 @@ docker build -t cron cron
 
 #### Install transmission
 cd $REPO_DIR
-git clone git@github.com:dgholz/docker-transmission.git
+git clone https://github.com/dgholz/docker-transmission.git
 cd docker-transmission
 docker build -t transmission .
 rm -rf $REPO_DIR/docker-transmission
@@ -94,7 +94,7 @@ sudo cp $REPO_DIR/config/generated/transmission.json $TARGET_DIR/transmission/co
 
 #### Install Sickbeard
 cd $REPO_DIR
-git clone git@github.com:timhaak/docker-sickrage.git
+git clone http://github.com/timhaak/docker-sickrage.git
 cd docker-sickrage
 docker build -t sickrage .
 rm -rf $REPO_DIR/docker-sickrage
