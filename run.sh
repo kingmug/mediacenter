@@ -2,11 +2,11 @@ REPO_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source $REPO_DIR/config/globals.conf
 
 
-docker run -d \
- --name cron \
- -v $TARGET_DIR/data/downloads:/data \
- -v $TARGET_DIR/data/shazam-tags:/shazam-tags \
- cron
+#docker run -d \
+# --name cron \
+# -v $TARGET_DIR/data/downloads:/data \
+# -v $TARGET_DIR/data/shazam-tags:/shazam-tags \
+# cron
 
 docker run -d \
  --name transmission1 \
@@ -39,3 +39,8 @@ docker run -d \
  -v $TARGET_DIR/data/downloads/movies:/data \
  -p 5050:5050 \
  couchpotato
+
+docker start couchpotato
+docker start sickrage
+docker start transmission1
+docker start transmissionClient

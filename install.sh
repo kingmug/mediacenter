@@ -68,9 +68,8 @@ mkdir $TARGET_DIR
 
 
 # Install File manager
-docker build -t cron cron
-
-
+#docker build -t cron cron
+crontab /home/arthur/git-repos/mediacenter/cron/crontab
 
 
 
@@ -120,10 +119,15 @@ mkdir -p $TARGET_DIR/couchpotato/config/
 sudo cp $REPO_DIR/config/generated/couchpotato.cfg $TARGET_DIR/couchpotato/config/CouchPotato.cfg
 
 
-
+cd $TARGET_DIR/
+rm data
+rm storage
+ln -s "$STORAGE_FOLDER/" storage
+ln -s storage data
 
 
 #### Install KODI
 
 # Install XBMC
 sudo apt-get install xbmc
+cp $REPO_DIR/config/kodi.desktop $home/.config/autostart/

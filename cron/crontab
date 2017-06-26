@@ -1,5 +1,7 @@
-*  *  *  *  * root bash /scripts/shazam-monitor-script.sh >> /var/log/cron.log 2>&1
-*  *  *  *  * root mv /shazam-tags/processed/song-unfound-* /shazam-tags/ >> /var/log/cron.log 2>&1
-10 21 *  *  * root bash /scripts/harddrive-monitor-script.sh >> /var/log/cron.log 2>&1
-*  *  *  *  * root /scripts/move-series.sh >> /var/log/cron.log 2>&1
+# *  *  *  *  * root bash /scripts/shazam-monitor-script.sh >> /var/log/cron.log 2>&1
+# *  *  *  *  * root mv /shazam-tags/processed/song-unfound-* /shazam-tags/ >> /var/log/cron.log 2>&1
+# 10 21 *  *  * root bash /scripts/harddrive-monitor-script.sh >> /var/log/cron.log 2>&1
 # *  *  *  *  * root echo "Test" >> /var/log/cron.log 2>&1
+
+
+*  *  *  *  * root /home/arthur/git-repos/mediacenter/cron/scripts/move-series.sh >> /var/log/cron.log 2>&1
