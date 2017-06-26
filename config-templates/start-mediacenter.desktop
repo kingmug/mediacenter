@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Exec=$HOME/git-repos/mediacenter/run.sh
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name[en_GB]=Mediacenter Docker containers
+Name=Media center Docke containers
+Comment[en_GB]=
+Comment=

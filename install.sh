@@ -11,27 +11,57 @@ do
     fi
 done < config/globals.conf
 
-if [ -z "${variables['TARGET_DIR']}" ]; then
+if [ -z "${variables['ROOT_FOLDER']}" ]; then
     echo ""
     echo "ERROR: You should configure it first. See file config/globals.conf"
     echo ""
     exit
 fi
 
-sudo rm -rf $TARGET_DIR/couchpotato
-sudo rm -rf $TARGET_DIR/sickrage/
-sudo rm -rf $TARGET_DIR/transmission
+# Prepare root folder
+if [ ! -d $ROOT_FOLDER ]; then 
+  mkdir $ROOT_FOLDER
+fi
 
-rm -rf config/generated
-mkdir config/generated
-cp -r config-templates/* config/generated
+# Link to storage folder
+cd $ROOT_FOLDER
 
-for i in config/generated/*; do
-    echo "Processing config file $i"
+if [ -L storage ]; then 
+  rm storage
+fi
+ln -s "$STORAGE_ROOT_FOLDER" storage
+
+# Setup download folders
+storageFolder=$ROOT_FOLDER/storage
+downloadsFolder=$storageFolder/downloads
+movies=$downloadsFolder/movies
+unordered=$downloadsFolder/unordered
+torrents=$downloadsFolder/torrents
+series=$downloadsFolder/series
+downloading=$downloadsFolder/downloading
+subtitles=$downloadsFolder/subtitles
+
+# Create docker folder
+cd $storageFolder
+dockerStorageFolder=$storageFolder/.mediacenter-docker-files
+if [ ! -d $storageFolder/.mediacenter-docker-files ]; then 
+  mkdir $storageFolder/.mediacenter-docker-files
+fi
+
+
+
+
+rm -rf $REPO_DIR/config/generated
+mkdir $REPO_DIR/config/generated
+cp -r $REPO_DIR/config-templates/* $REPO_DIR/config/generated
+
+cd $REPO_DIR
+for i in $REPO_DIR/config/generated/*; do
+    #echo "Processing config file $i"
     cp ${i} tmp
     for j in ${!variables[@]}; do
         result="sed -e 's|<${j}>|${variables[$j]}|g' tmp > tmp2"
-        echo "Replacing var $j: $result"
+        #echo "Replacing var $j: $result"
         eval $result
 
         mv tmp2 tmp
@@ -40,6 +70,7 @@ for i in config/generated/*; do
 done
 
 
+#echo "Setting up series"
 declare -A series
 while IFS=$'    ' read -r f1 f2; do 
    series[$f1]=$f2;
@@ -47,7 +78,7 @@ done < $REPO_DIR/config/series.csv
 
 
 
-sudo add-apt-repository ppa:team-xbmc/ppa
+sudo add-apt-repository -y ppa:team-xbmc/ppa
 
 sudo apt-get update
 sudo apt-get install linux-image-generic curl
@@ -56,20 +87,17 @@ sudo apt-get install linux-image-generic curl
 curl -sSL https://get.docker.com/ | sh
 
 # Create the docker group and add your user.
-sudo usermod -aG docker "${user}"
+sudo usermod -aG docker "${USER}"
 
 
 
 docker rm -f `docker ps --no-trunc -aq`
 
-sudo rm -rf $TARGET_DIR
-mkdir $TARGET_DIR
-
 
 
 # Install File manager
 #docker build -t cron cron
-crontab /home/arthur/git-repos/mediacenter/cron/crontab
+crontab $REPO_DIR/cron/crontab
 
 
 
@@ -82,8 +110,10 @@ docker build -t transmission .
 rm -rf $REPO_DIR/docker-transmission
 
 # Override config
-mkdir -p $TARGET_DIR/transmission/config/
-sudo cp $REPO_DIR/config/generated/transmission.json $TARGET_DIR/transmission/config/settings.json
+mkdir -p $dockerStorageFolder/transmission/config/
+if [ ! -f $dockerStorageFolder/transmission/config/settings.json ]; then 
+  cp $REPO_DIR/config/generated/transmission.json $dockerStorageFolder/transmission/config/settings.json
+fi
 
 
 
@@ -99,8 +129,12 @@ docker build -t sickrage .
 rm -rf $REPO_DIR/docker-sickrage
 
 # Override config
-mkdir -p $TARGET_DIR/sickrage/config/
-sudo cp $REPO_DIR/config/generated/sickbeard.ini $TARGET_DIR/sickrage/config/config.ini
+mkdir -p $dockerStorageFolder/sickrage/config/
+if [ ! -f $dockerStorageFolder/sickrage/config/config.ini ]; then 
+  cp $REPO_DIR/config/generated/sickbeard.ini $dockerStorageFolder/sickrage/config/config.ini
+fi
+
+
 
 
 
@@ -115,19 +149,69 @@ docker build -t couchpotato .
 rm -rf $REPO_DIR/docker-couchpotato
 
 # Override config
-mkdir -p $TARGET_DIR/couchpotato/config/
-sudo cp $REPO_DIR/config/generated/couchpotato.cfg $TARGET_DIR/couchpotato/config/CouchPotato.cfg
+mkdir -p $dockerStorageFolder/couchpotato/config/
+if [ ! -f $dockerStorageFolder/couchpotato/config/CouchPotato.cfg ]; then 
+  cp $REPO_DIR/config/generated/couchpotato.cfg $dockerStorageFolder/couchpotato/config/CouchPotato.cfg
+fi
 
 
-cd $TARGET_DIR/
-rm data
-rm storage
-ln -s "$STORAGE_FOLDER/" storage
-ln -s storage data
 
+
+#docker run -d \
+# --name cron \
+# -v $dockerStorageFolder/data/downloads:/data \
+# -v $dockerStorageFolder/data/shazam-tags:/shazam-tags \
+# cron
+
+docker run -d \
+ --name transmission1 \
+ -v $downloadsFolder/unordered:/transmission/download \
+ -v $dockerStorageFolder/transmission/config:/transmission/config \
+ -p 9091:9091 \
+ -p 51413:51413 \
+ -p 51413:51413/udp \
+ transmission
+
+docker run \
+ --name transmissionClient \
+ --link transmission1:transmission \
+ busybox
+
+docker run -d \
+ --name sickrage \
+ -h localhost \
+ -v $dockerStorageFolder/sickrage/config:/config \
+ -v $downloadsFolder/series:/data \
+ -p 8081:8081 \
+ sickrage
+
+
+# Run docker container
+docker run -d \
+ --name couchpotato \
+ -h localhost \
+ -v $dockerStorageFolder/couchpotato/config:/config \
+ -v $downloadsFolder/movies:/data \
+ -p 5050:5050 \
+ couchpotato
+
+
+cp $REPO_DIR/config/kodi.desktop $HOME/.config/autostart/
+cp $REPO_DIR/config/generated/start-mediacenter.desktop $HOME/.config/autostart/
+
+echo "enabled=0" | sudo tee /etc/default/apport
 
 #### Install KODI
-
-# Install XBMC
+echo "Installing XBMC"
 sudo apt-get install xbmc
-cp $REPO_DIR/config/kodi.desktop $home/.config/autostart/
+
+# Generate the kodi configuration
+if [ ! -d $dockerStorageFolder/kodi ]; then 
+  mkdir $dockerStorageFolder/kodi
+fi
+if [ ! -f $dockerStorageFolder/kodi/sources.xml ]; then 
+  cp $REPO_DIR/config-templates/kodi-sources.xml $dockerStorageFolder/kodi/sources.xml
+fi
+cd $HOME/.kodi/userdata/
+rm sources.xml
+ln -s $dockerStorageFolder/kodi/sources.xml
