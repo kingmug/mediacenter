@@ -1,4 +1,4 @@
-docker start couchpotato
-docker start sickrage
-docker start transmission1
-docker start transmissionClient
+docker start mediacenter_couchpotato
+docker start mediacenter_sickrage
+docker start mediacenter_transmission
+docker start mediacenter_transmissionClient
