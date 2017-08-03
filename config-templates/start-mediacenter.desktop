@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Exec=${home}/git-repos/mediacenter/run.sh
+Exec=$${startmediacenter.home}/git-repos/mediacenter/run.sh
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true

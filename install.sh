@@ -57,11 +57,13 @@ variables['couchpotato.movies']="/transmission/download-movies"
 variables['couchpotato.password']="$USER"
 variables['couchpotato.IP_ADDRESS']="$IP_ADDRESS"
 variables['sickrage.series']="/transmission/download-series"
+variables['sickrage.unordered']="/transmission/download"
 variables['sickrage.IP_ADDRESS']="$IP_ADDRESS"
 variables['transmission.downloading']="/transmission/incomplete"
 variables['transmission.home']="/transmission"
 variables['transmission.unordered']="/transmission/download"
-
+variables['transmission.series']="/transmission/download-series"
+variables['startmediacenter.home']=$HOME
 
 rm -rf $REPO_DIR/config/generated
 mkdir $REPO_DIR/config/generated
@@ -72,7 +74,7 @@ for i in $REPO_DIR/config/generated/*; do
 #    echo "Processing config file $i"
     cp ${i} tmp
     for j in ${!variables[@]}; do
-        result="sed -e 's|\${${j}}|${variables[$j]}|g' tmp > tmp2"
+        result="sed -e 's|\$\${${j}}|${variables[$j]}|g' tmp > tmp2"
 #        echo "Replacing var $j: $result"
         eval $result
 
@@ -81,18 +83,11 @@ for i in $REPO_DIR/config/generated/*; do
     mv tmp "$i"
 done
 
-grep "\${" $REPO_DIR/config/generated/*
+grep "\$\${" $REPO_DIR/config/generated/*
 if [ "$?" -eq 0 ]; then
   echo "There are unresolved variables in the config files (see above lines). Exiting." 
   exit
 fi
-
-
-#echo "Setting up series"
-declare -A series
-while IFS=$'    ' read -r f1 f2; do 
-   series[$f1]=$f2;
-done < $REPO_DIR/config/series.csv
 
 
 cp $REPO_DIR/config/kodi.desktop $HOME/.config/autostart/
@@ -148,8 +143,11 @@ if ! [ -x "$(command -v docker)" ]; then
 fi
 
 
-# Install the crontab
-crontab $REPO_DIR/cron/crontab
+# Setup the post process script
+mkdir -p $dockerStorageFolder/transmission/config/postprocess/
+cp $REPO_DIR/config/generated/download-postprocess.sh $dockerStorageFolder/transmission/config/postprocess/download-postprocess.sh
+cp $REPO_DIR/config/series.csv $dockerStorageFolder/transmission/config/postprocess/series.csv
+
 
 
 
@@ -222,7 +220,9 @@ docker run -d \
  --restart=always \
  sickrage
 
-
+# Replace provider configuration
+cp $REPO_DIR/config/sed.sh $dockerStorageFolder/sickrage/config/sed.sh
+docker exec -i -t mediacenter_sickrage sh /config/sed.sh
 
 
 
