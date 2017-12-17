@@ -105,7 +105,8 @@ fi
 
 
 # Generate the kodi configuration
-cd $HOME/.kodi/userdata/
+cd $HOME/.kodi/
+userdata/
 if [ ! -d $dockerStorageFolder/kodi ]; then 
   mkdir $dockerStorageFolder/kodi
 fi
@@ -140,10 +141,8 @@ if ! [ -x "$(command -v docker)" ]; then
   # Get the latest Docker package
   curl -sSL https://get.docker.com/ | sh
 fi
-echo $USER
 sudo usermod -aG docker "${USER}"
 
-sudo service docker start
 
 # Setup the post process script
 mkdir -p $dockerStorageFolder/transmission/config/postprocess/
