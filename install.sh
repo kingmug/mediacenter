@@ -41,6 +41,7 @@ cd $ROOT_FOLDER
 if [ -L storage ]; then 
   rm storage
 fi
+mkdir "$STORAGE_ROOT_FOLDER"
 ln -s "$STORAGE_ROOT_FOLDER" storage
 
 # Create docker folder
