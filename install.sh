@@ -164,7 +164,9 @@ cp $REPO_DIR/config/series.csv $dockerStorageFolder/transmission/config/postproc
 
 
 # Delete all docker containers
-docker rm -f `docker ps --no-trunc -aq`
+docker stop $(docker ps -a -q)
+#docker rm -f `docker ps --no-trunc -aq`
+docker rm $(docker ps -a -q)
 
 #### Install transmission
 docker ps -a | grep -q "mediacenter_transmission"
@@ -195,7 +197,7 @@ docker run -d \
  -p 51413:51413 \
  -p 51413:51413/udp \
  --restart=always \
- transmission
+ timhaak/transmission
 
 docker run -d \
  --name mediacenter_transmissionClient \
@@ -229,7 +231,7 @@ docker run -d \
  -v $downloadsFolder/series:/transmission/download-series \
  -p 8081:8081 \
  --restart=always \
- sickrage
+ timhaak/sickrage
 
 # Replace provider configuration
 #cp $REPO_DIR/config/sed.sh $dockerStorageFolder/sickrage/config/sed.sh
@@ -267,7 +269,7 @@ docker run -d \
  -v $downloadsFolder/movies:/transmission/download-movies \
  -p 5050:5050 \
  --restart=always \
- couchpotato
+ timhaak/couchpotato
 
 
 

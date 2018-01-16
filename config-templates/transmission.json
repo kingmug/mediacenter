@@ -52,7 +52,7 @@
     "rpc-authentication-required": true, 
     "rpc-bind-address": "0.0.0.0", 
     "rpc-enabled": true, 
-    "rpc-password": "{7070d7ceea6650094368690207dc9603ff73b217yt7Uw2ET", 
+    "rpc-password": "",
     "rpc-port": 9091, 
     "rpc-url": "/transmission/", 
     "rpc-username": "admin", 
@@ -92,3 +92,4 @@
     "watch-dir": "", 
     "watch-dir-enabled": true
 }
+
