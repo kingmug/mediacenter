@@ -5,6 +5,15 @@ echo "enabled=0" | sudo tee /etc/default/apport > /dev/null
 
 source $REPO_DIR/config/globals.conf
 
+if [ -z "$networkInterface" ]; then
+    export networkInterface="eth0"
+fi
+echo $networkInterface
+
+IP_ADDRESS=$(ifconfig $networkInterface | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+
+echo $IP_ADDRESS
+
 if [ -z "${ROOT_FOLDER}" ]; then
     echo "ERROR: You should configure ROOT_FOLDER first. See file config/globals.conf"
     exit
@@ -223,10 +232,10 @@ docker run -d \
  sickrage
 
 # Replace provider configuration
-cp $REPO_DIR/config/sed.sh $dockerStorageFolder/sickrage/config/sed.sh
-docker exec -i -t mediacenter_sickrage sh /config/sed.sh
+#cp $REPO_DIR/config/sed.sh $dockerStorageFolder/sickrage/config/sed.sh
+#docker exec -i -t mediacenter_sickrage sh /config/sed.sh
 
-
+#docker exec -i -t mediacenter_sickrage ls /transmission/download-series
 
 
 
