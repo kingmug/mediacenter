@@ -63,16 +63,10 @@ fi
 
 
 declare -A variables
-variables['couchpotato.movies']="/transmission/download-movies"
+variables['couchpotato.movies']="/data"
 variables['couchpotato.password']="$USER"
-variables['couchpotato.IP_ADDRESS']="$IP_ADDRESS"
-variables['sickrage.series']="/transmission/download-series"
-variables['sickrage.unordered']="/transmission/download"
-variables['sickrage.IP_ADDRESS']="$IP_ADDRESS"
-variables['transmission.downloading']="/transmission/incomplete"
-variables['transmission.home']="/transmission"
-variables['transmission.unordered']="/transmission/download"
-variables['transmission.series']="/transmission/download-series"
+variables['IP_ADDRESS']="$IP_ADDRESS"
+variables['kodi.storageFolder']=$storageFolder
 variables['startmediacenter.home']=$HOME
 
 rm -rf $REPO_DIR/config/generated
@@ -165,8 +159,7 @@ cp $REPO_DIR/config/series.csv $dockerStorageFolder/transmission/config/postproc
 
 # Delete all docker containers
 docker stop $(docker ps -a -q)
-#docker rm -f `docker ps --no-trunc -aq`
-docker rm $(docker ps -a -q)
+docker rm -f `docker ps --no-trunc -aq`
 
 #### Install transmission
 docker ps -a | grep -q "mediacenter_transmission"
@@ -187,12 +180,12 @@ fi
 
 docker run -d \
  --name mediacenter_transmission \
- -v $downloadsFolder/series:/transmission/download-series \
- -v $downloadsFolder/movies:/transmission/download-movies \
- -v $downloadsFolder/downloading:/transmission/incomplete \
- -v $downloadsFolder/unordered:/transmission/download \
- -v $downloadsFolder/torrents:/transmission/watch \
- -v $dockerStorageFolder/transmission/config:/transmission/config \
+ -v $downloadsFolder/series:/downloads/series \
+ -v $downloadsFolder/movies:/downloads/movies \
+ -v $downloadsFolder/unordered:/downloads/unordered \
+ -v $downloadsFolder/downloading:/incomplete \
+ -v $downloadsFolder/torrents:/watch \
+ -v $dockerStorageFolder/transmission/config:/config \
  -p 9091:9091 \
  -p 51413:51413 \
  -p 51413:51413/udp \
@@ -228,16 +221,11 @@ docker run -d \
  --name mediacenter_sickrage \
  -h localhost \
  -v $dockerStorageFolder/sickrage/config:/config \
- -v $downloadsFolder/series:/transmission/download-series \
+ -v $downloadsFolder/series:/data \
  -p 8081:8081 \
  --restart=always \
  timhaak/sickrage
 
-# Replace provider configuration
-#cp $REPO_DIR/config/sed.sh $dockerStorageFolder/sickrage/config/sed.sh
-#docker exec -i -t mediacenter_sickrage sh /config/sed.sh
-
-#docker exec -i -t mediacenter_sickrage ls /transmission/download-series
 
 
 
@@ -266,7 +254,8 @@ docker run -d \
  --name mediacenter_couchpotato \
  -h localhost \
  -v $dockerStorageFolder/couchpotato/config:/config \
- -v $downloadsFolder/movies:/transmission/download-movies \
+ -v $dockerStorageFolder/couchpotato/data:/data \
+ -v $downloadsFolder/movies:/movies \
  -p 5050:5050 \
  --restart=always \
  timhaak/couchpotato

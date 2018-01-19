@@ -5,13 +5,19 @@
     <video>
         <default pathversion="1"></default>
         <source>
-            <name>series</name>
-            <path pathversion="1"><series>/</path>
+            <name>movies</name>
+            <path pathversion="1">$${kodi.storageFolder}/downloads/movies/</path>
+            <path pathversion="1">$${kodi.storageFolder}/downloads/unordered/</path>
             <allowsharing>true</allowsharing>
         </source>
         <source>
-            <name>movies</name>
-            <path pathversion="1"><movies>/</path>
+            <name>series</name>
+            <path pathversion="1">$${kodi.storageFolder}/downloads/series/</path>
+            <allowsharing>true</allowsharing>
+        </source>
+        <source>
+            <name>unordered</name>
+            <path pathversion="1">$${kodi.storageFolder}/downloads/unordered/</path>
             <allowsharing>true</allowsharing>
         </source>
     </video>
@@ -23,5 +29,15 @@
     </pictures>
     <files>
         <default pathversion="1"></default>
+        <source>
+            <name>fusion addons</name>
+            <path pathversion="1">http://fusion.tvaddons.ag/</path>
+            <allowsharing>true</allowsharing>
+        </source>
+        <source>
+            <name>Downloads</name>
+            <path pathversion="1">/home/arthur/Downloads/</path>
+            <allowsharing>true</allowsharing>
+        </source>
     </files>
 </sources>
