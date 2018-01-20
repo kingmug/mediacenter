@@ -5,14 +5,17 @@ echo "enabled=0" | sudo tee /etc/default/apport > /dev/null
 
 source $REPO_DIR/config/globals.conf
 
-if [ -z "$networkInterface" ]; then
-    export networkInterface="eth0"
+if [ -z "$NETWORK_INTERFACE" ]; then
+    export NETWORK_INTERFACE="eth0"
 fi
-echo $networkInterface
 
-IP_ADDRESS=$(ifconfig $networkInterface | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
-
-echo $IP_ADDRESS
+if [ -z "${IP_ADDRESS}" ]; then
+  IP_ADDRESS=$(ifconfig $NETWORK_INTERFACE | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+  if [ -z "${IP_ADDRESS}" ]; then
+    echo "ERROR: Could not find an IP address. You can either connect yourself to the internet on network interface $NETWORK_INTERFACE. You can also change the network interface in config/globals.con using NETWORK_INTERFACE and try again. Or you can set the ip address manually using config variable IP_ADDRESS in config/globals.conf"
+    exit
+  fi
+fi
 
 if [ -z "${ROOT_FOLDER}" ]; then
     echo "ERROR: You should configure ROOT_FOLDER first. See file config/globals.conf"
@@ -108,21 +111,15 @@ fi
 
 
 # Generate the kodi configuration
-cd $HOME/.kodi/userdata/
-if [ ! -d $dockerStorageFolder/kodi ]; then 
-  mkdir $dockerStorageFolder/kodi
+if [ ! -d $HOME/.kodi/userdata ]; then 
+  mkdir -p $HOME/.kodi/userdata
 fi
-if [ ! -f $dockerStorageFolder/kodi/sources.xml ]; then 
-  cp $REPO_DIR/config/generated/kodi-sources.xml $dockerStorageFolder/kodi/sources.xml
+if [ ! -f $HOME/.kodi/userdata/sources.xml ]; then 
+  cp $REPO_DIR/config/generated/kodi-sources.xml $HOME/.kodi/userdata/sources.xml
 fi
-rm sources.xml
-ln -s $dockerStorageFolder/kodi/sources.xml
-
-if [ ! -f $dockerStorageFolder/kodi/guisettings.xml ]; then 
-  cp $REPO_DIR/config/generated/kodi-guisettings.xml $dockerStorageFolder/kodi/guisettings.xml
+if [ ! -f $HOME/.kodi/guisettings.xml ]; then 
+  cp $REPO_DIR/config/generated/kodi-guisettings.xml $HOME/.kodi/userdata/guisettings.xml
 fi
-rm guisettings.xml
-ln -s $dockerStorageFolder/kodi/guisettings.xml
 
 
 
