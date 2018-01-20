@@ -303,8 +303,8 @@
         <useairplaypassword default="true">false</useairplaypassword>
         <webserver>true</webserver>
         <webserverpassword default="true"></webserverpassword>
-        <webserverport default="true">8080</webserverport>
-        <webserverusername><user></webserverusername>
+        <webserverport>8080</webserverport>
+        <webserverusername default="true">kodi</webserverusername>
         <webskin default="true">webinterface.default</webskin>
         <zeroconf default="true">true</zeroconf>
     </services>
